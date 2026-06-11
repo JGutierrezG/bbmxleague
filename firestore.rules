@@ -1,0 +1,90 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Users ────────────────────────────────────────────────────────────────
+    // Anyone logged in can read profiles (needed for referee search).
+    // Only the owner can write their own profile.
+    match /users/{userId} {
+      allow read:  if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ── Tournaments ──────────────────────────────────────────────────────────
+    match /tournaments/{tournamentId} {
+
+      // Helper: fetch the tournament doc from nested rules (costs 1 read)
+      function tournamentDoc() {
+        return get(/databases/$(database)/documents/tournaments/$(tournamentId)).data;
+      }
+
+      // isOrganizer / isReferee accept the tournament data explicitly so they
+      // work both at tournament level (resource.data) and from nested rules
+      // (tournamentDoc()) without confusion.
+      function isOrganizerOf(t) {
+        return request.auth != null && request.auth.uid == t.createdBy;
+      }
+      function isRefereeOf(t) {
+        return request.auth != null &&
+               'refereeUids' in t &&
+               request.auth.uid in t.refereeUids;
+      }
+      function canManage(t) {
+        return isOrganizerOf(t) || isRefereeOf(t);
+      }
+
+      // Any logged-in user can read (needed to look up invite codes).
+      allow read: if request.auth != null;
+
+      // Any logged-in user can create, but must set themselves as createdBy.
+      allow create: if request.auth != null &&
+                       request.resource.data.createdBy == request.auth.uid;
+
+      // Organizer or referee can update anything.
+      // A joining participant can only touch participantUids (arrayUnion their uid).
+      allow update: if request.auth != null && (
+                       canManage(resource.data) ||
+                       request.resource.data.diff(resource.data)
+                         .affectedKeys().hasOnly(['participantUids'])
+                    );
+
+      // Only the organizer can delete a tournament.
+      allow delete: if isOrganizerOf(resource.data);
+
+      // ── Participants ───────────────────────────────────────────────────────
+      // Any logged-in user can read or add a participant (organizer adds
+      // manually; users add themselves via the join flow).
+      // Only organizer or referee can remove a participant.
+      match /participants/{participantId} {
+        allow read:   if request.auth != null;
+        allow create: if request.auth != null;
+        allow update: if request.auth != null;
+        allow delete: if canManage(tournamentDoc());
+      }
+
+      // ── Groups ────────────────────────────────────────────────────────────
+      // Created in a batch when the organizer/referee closes registration.
+      // Only organizer or referee can create/delete groups.
+      match /groups/{groupId} {
+        allow read:  if request.auth != null;
+        allow write: if canManage(tournamentDoc());
+
+        // Matches inside groups: any logged-in user can score.
+        // In practice the device is in the hands of the referee.
+        match /matches/{matchId} {
+          allow read:  if request.auth != null;
+          allow write: if request.auth != null;
+        }
+      }
+
+      // ── Bracket ───────────────────────────────────────────────────────────
+      // Created in a batch by organizer/referee. Scoring is open to any
+      // logged-in user (same rationale as group matches).
+      match /bracket/{matchId} {
+        allow read:  if request.auth != null;
+        allow write: if request.auth != null;
+      }
+    }
+  }
+}

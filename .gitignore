@@ -39,3 +39,11 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Firebase — contain OAuth client IDs, get from Firebase Console
+google-services.json
+GoogleService-Info.plist
+
+# EAS / local secrets
+.env
+.env.local

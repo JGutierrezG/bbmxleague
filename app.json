@@ -2,14 +2,18 @@
   "expo": {
     "name": "BeybladeApp",
     "slug": "BeybladeApp",
+    "scheme": "beybladeapp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.elpapa.beybladetournament"
     },
     "android": {
+      "package": "com.elpapa.beybladetournament",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -19,6 +23,20 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "@react-native-google-signin/google-signin",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "La app necesita acceso a tu galería para cambiar la foto de perfil."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "487ac9da-26a4-4344-b8c0-69bf61eea105"
+      }
     }
   }
 }
