@@ -4,7 +4,7 @@ import {
   ScrollView, ActivityIndicator,
 } from 'react-native';
 import {
-  doc, collection, onSnapshot, writeBatch, serverTimestamp,
+  doc, collection, onSnapshot, writeBatch, serverTimestamp, updateDoc,
 } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 import { pow2, getRoundLabel, buildSeeds } from '../utils/bracketUtils';
@@ -114,6 +114,8 @@ export default function TournamentScreen({ navigation, route }) {
 
   const playerName   = id => participantsMap[id]?.name ?? '—';
   const isOrganizer  = tournament?.createdBy === auth.currentUser?.uid;
+  const isReferee    = tournament?.refereeUids?.includes(auth.currentUser?.uid) ?? false;
+  const canManage    = isOrganizer || isReferee;
   const allGroupsDone = groups.length > 0 && groups.every(g => {
     const ms = matchesByGroup[g.id] ?? [];
     return ms.length > 0 && ms.every(m => m.status === 'done');
@@ -387,7 +389,7 @@ export default function TournamentScreen({ navigation, route }) {
           )}
 
           {/* Generate button */}
-          {allGroupsDone && isOrganizer && (
+          {allGroupsDone && canManage && (
             <TouchableOpacity style={s.generateBtn} onPress={generateBracket} disabled={generatingBracket}>
               {generatingBracket
                 ? <ActivityIndicator color="#fff" />
@@ -500,6 +502,14 @@ export default function TournamentScreen({ navigation, route }) {
       );
     }
 
+    async function finalizeTournament() {
+      if (!championId) return;
+      await updateDoc(doc(db, 'tournaments', tournamentId), {
+        status: 'finished',
+        winnerId: championId,
+      });
+    }
+
     return (
       <ScrollView contentContainerStyle={{ paddingVertical: 16, paddingBottom: 40 }}>
         {/* Champion banner */}
@@ -510,6 +520,16 @@ export default function TournamentScreen({ navigation, route }) {
             <Text style={s.championName}>{playerName(championId)}</Text>
             {participantsMap[championId]?.beyName && (
               <Text style={s.championBey}>{participantsMap[championId].beyName}</Text>
+            )}
+            {tournament?.status !== 'finished' && canManage && (
+              <TouchableOpacity style={s.finalizeBtn} onPress={finalizeTournament}>
+                <Text style={s.finalizeBtnText}>Finalizar torneo</Text>
+              </TouchableOpacity>
+            )}
+            {tournament?.status === 'finished' && (
+              <View style={s.finishedBadge}>
+                <Text style={s.finishedBadgeText}>TORNEO FINALIZADO</Text>
+              </View>
             )}
           </View>
         )}
@@ -697,4 +717,8 @@ const s = StyleSheet.create({
   championLabel:        { fontSize: 9, letterSpacing: 4, color: '#92741a', textTransform: 'uppercase' },
   championName:         { fontSize: 26, fontWeight: '900', color: '#fbbf24', letterSpacing: 1 },
   championBey:          { fontSize: 12, color: '#92741a', fontStyle: 'italic' },
+  finalizeBtn:          { marginTop: 12, backgroundColor: '#e63946', borderRadius: 10, paddingHorizontal: 20, paddingVertical: 10 },
+  finalizeBtnText:      { color: '#fff', fontSize: 13, fontWeight: '700', letterSpacing: 1 },
+  finishedBadge:        { marginTop: 10, backgroundColor: '#1a1a0f', borderWidth: 1, borderColor: '#92741a', borderRadius: 8, paddingHorizontal: 14, paddingVertical: 6 },
+  finishedBadgeText:    { fontSize: 9, letterSpacing: 3, color: '#92741a', fontWeight: '700' },
 });

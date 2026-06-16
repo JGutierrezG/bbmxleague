@@ -204,15 +204,15 @@ export default function ProfileScreen({ navigation }) {
           <Text style={s.emailText}>{user?.email}</Text>
         </View>
 
-        {/* Beyblade name */}
+        {/* Bey name */}
         <View style={s.section}>
-          <Text style={s.sectionLabel}>BEYBLADE FAVORITO</Text>
+          <Text style={s.sectionLabel}>BEY FAVORITO</Text>
           {editing ? (
             <TextInput
               style={s.fieldInput}
               value={beyName}
               onChangeText={setBeyName}
-              placeholder="Nombre de tu Beyblade"
+              placeholder="Nombre de tu Bey"
               placeholderTextColor="#444"
             />
           ) : (

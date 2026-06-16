@@ -47,6 +47,9 @@ export default function PreRegistroScreen({ navigation, route }) {
   const [allUsers, setAllUsers]           = useState([]);
   const [usersLoaded, setUsersLoaded]     = useState(false);
 
+  const [playerSearch, setPlayerSearch]   = useState('');
+  const [playerResults, setPlayerResults] = useState([]);
+
   useEffect(() => {
     const unsubT = onSnapshot(doc(db, 'tournaments', tournamentId), async snap => {
       const data = { id: snap.id, ...snap.data() };
@@ -112,6 +115,43 @@ export default function PreRegistroScreen({ navigation, route }) {
     await updateDoc(doc(db, 'tournaments', tournamentId), {
       refereeUids: arrayRemove(uid),
     });
+  }
+
+  function searchPlayers(text) {
+    setPlayerSearch(text);
+    if (text.trim().length < 2) { setPlayerResults([]); return; }
+    const q = text.trim().toLowerCase();
+    const existingUids = participants.filter(p => p.uid).map(p => p.uid);
+    setPlayerResults(
+      allUsers
+        .filter(u =>
+          u.uid !== auth.currentUser.uid &&
+          !existingUids.includes(u.uid) &&
+          (
+            (u.displayName || '').toLowerCase().includes(q) ||
+            (u.email || '').toLowerCase().includes(q)
+          ),
+        )
+        .slice(0, 5),
+    );
+  }
+
+  async function addRegisteredPlayer(u) {
+    await Promise.all([
+      addDoc(collection(db, 'tournaments', tournamentId, 'participants'), {
+        uid:     u.uid,
+        name:    u.displayName ?? u.email,
+        beyName: '',
+        source:  'organizer',
+        addedBy: auth.currentUser.uid,
+        addedAt: serverTimestamp(),
+      }),
+      updateDoc(doc(db, 'tournaments', tournamentId), {
+        participantUids: arrayUnion(u.uid),
+      }),
+    ]);
+    setPlayerSearch('');
+    setPlayerResults([]);
   }
 
   async function handleAddPlayer() {
@@ -254,7 +294,7 @@ export default function PreRegistroScreen({ navigation, route }) {
             />
             <TextInput
               style={s.input}
-              placeholder="Nombre del Beyblade (opcional)"
+              placeholder="Nombre del Bey (opcional)"
               placeholderTextColor="#444"
               value={addBey}
               onChangeText={setAddBey}
@@ -268,6 +308,29 @@ export default function PreRegistroScreen({ navigation, route }) {
                 ? <ActivityIndicator color="#fff" size="small" />
                 : <Text style={s.addBtnText}>+ Agregar</Text>}
             </TouchableOpacity>
+
+            <Text style={s.orDivider}>— O BUSCAR USUARIO REGISTRADO —</Text>
+            <TextInput
+              style={s.input}
+              placeholder="Buscar por nombre o email..."
+              placeholderTextColor="#444"
+              value={playerSearch}
+              onFocus={loadUsersIfNeeded}
+              onChangeText={searchPlayers}
+              autoCapitalize="none"
+            />
+            {playerResults.map(u => (
+              <TouchableOpacity key={u.uid} style={s.refResultRow} onPress={() => addRegisteredPlayer(u)}>
+                <View style={s.refereeAvatar}>
+                  <Text style={s.refereeAvatarText}>{(u.displayName || '?')[0].toUpperCase()}</Text>
+                </View>
+                <View style={s.refereeInfo}>
+                  <Text style={s.refereeName}>{u.displayName}</Text>
+                  <Text style={s.refereeEmail}>{u.email}</Text>
+                </View>
+                <Text style={s.refAddIcon}>+</Text>
+              </TouchableOpacity>
+            ))}
           </View>
         )}
 
@@ -449,6 +512,7 @@ const s = StyleSheet.create({
   addBtn:         { backgroundColor: '#e63946', borderRadius: 10, padding: 12, alignItems: 'center' },
   addBtnText:     { color: '#fff', fontSize: 13, fontWeight: '600' },
   btnDisabled:    { opacity: 0.35 },
+  orDivider:      { fontSize: 9, color: '#333', textAlign: 'center', letterSpacing: 2, marginVertical: 14 },
 
   empty:          { marginHorizontal: 20, backgroundColor: '#12121a', borderRadius: 12, padding: 20, borderWidth: 0.5, borderColor: '#1e1e2e', alignItems: 'center' },
   emptyText:      { color: '#444', fontSize: 13 },

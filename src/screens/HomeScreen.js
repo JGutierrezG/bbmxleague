@@ -8,14 +8,11 @@ import {
   getDocs, addDoc, serverTimestamp, doc, updateDoc, arrayUnion,
 } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
-import { seedTestTournament } from '../utils/seedData';
-
 export default function HomeScreen({ navigation }) {
   const [myTournaments, setMyTournaments]       = useState([]);
   const [joinedTournaments, setJoinedTournaments] = useState([]);
   const [loading, setLoading]                   = useState(true);
 
-  const [seeding, setSeeding]               = useState(false);
   const [showJoin, setShowJoin]             = useState(false);
   const [code, setCode]                     = useState('');
   const [joinName, setJoinName]             = useState('');
@@ -179,26 +176,6 @@ export default function HomeScreen({ navigation }) {
       </View>
 
       <ScrollView style={st.scroll} contentContainerStyle={{ paddingBottom: 100 }}>
-        {/* DEV seed button */}
-        <TouchableOpacity
-          style={st.seedBtn}
-          disabled={seeding}
-          onPress={async () => {
-            setSeeding(true);
-            try {
-              const tid = await seedTestTournament();
-              navigation.navigate('Tournament', { tournamentId: tid });
-            } finally {
-              setSeeding(false);
-            }
-          }}
-        >
-          {seeding
-            ? <ActivityIndicator color="#555" size="small" />
-            : <Text style={st.seedBtnText}>+ Torneo de prueba</Text>
-          }
-        </TouchableOpacity>
-
         <Text style={st.sectionLabel}>ORGANIZANDO</Text>
         {myTournaments.length === 0
           ? <View style={st.empty}><Text style={st.emptyText}>No has creado torneos aún</Text></View>
@@ -273,7 +250,7 @@ export default function HomeScreen({ navigation }) {
                 />
                 <TextInput
                   style={st.input}
-                  placeholder="Nombre de tu Beyblade (opcional)"
+                  placeholder="Nombre de tu Bey (opcional)"
                   placeholderTextColor="#444"
                   value={joinBey}
                   onChangeText={setJoinBey}
@@ -319,8 +296,6 @@ const st = StyleSheet.create({
   badgeText:       { fontSize: 10, fontWeight: '600', letterSpacing: 1, textTransform: 'uppercase' },
   cardMeta:        { fontSize: 12, color: '#555' },
 
-  seedBtn:         { marginHorizontal: 20, marginTop: 16, marginBottom: 4, borderWidth: 1, borderColor: '#222', borderStyle: 'dashed', borderRadius: 10, padding: 10, alignItems: 'center' },
-  seedBtnText:     { color: '#333', fontSize: 12 },
   fabGroup:        { position: 'absolute', bottom: 24, right: 20, alignItems: 'flex-end', gap: 10 },
   fabSecondary:    { backgroundColor: '#1e1e2e', borderWidth: 1, borderColor: '#e63946', borderRadius: 24, paddingHorizontal: 18, paddingVertical: 12 },
   fabSecondaryText:{ color: '#e63946', fontSize: 13, fontWeight: '600' },

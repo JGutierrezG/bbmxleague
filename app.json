@@ -1,21 +1,26 @@
 {
   "expo": {
-    "name": "BeybladeApp",
-    "slug": "BeybladeApp",
-    "scheme": "beybladeapp",
+    "name": "MXBBL",
+    "slug": "mxbbl",
+    "scheme": "mxbbl",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0a0a0f"
+    },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.elpapa.beybladetournament"
+      "bundleIdentifier": "com.elpapa.mxbbl"
     },
     "android": {
-      "package": "com.elpapa.beybladetournament",
+      "package": "com.elpapa.mxbbl",
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#0a0a0f",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"

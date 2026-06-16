@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  ActivityIndicator, SafeAreaView, Animated,
+  ActivityIndicator, SafeAreaView, Animated, Linking,
 } from 'react-native';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
@@ -16,7 +16,7 @@ GoogleSignin.configure({ webClientId: WEB_CLIENT_ID });
 export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState('');
-  const spinAnim              = new Animated.Value(0);
+  const spinAnim              = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     Animated.loop(
@@ -64,8 +64,8 @@ export default function LoginScreen() {
   return (
     <SafeAreaView style={s.container}>
       <View style={s.inner}>
-        <Text style={s.logo}>BEYBLADE</Text>
-        <Text style={s.sub}>TOURNAMENT MANAGER</Text>
+        <Text style={s.logo}>MXBBL</Text>
+        <Text style={s.sub}>LIGA MEXICANA</Text>
 
         <Animated.View style={[s.ring, { transform: [{ rotate: spin }] }]} />
 
@@ -86,7 +86,15 @@ export default function LoginScreen() {
           )}
         </TouchableOpacity>
 
-        <Text style={s.terms}>Al continuar aceptas los Términos de Servicio</Text>
+        <Text style={s.terms}>
+          Al continuar aceptas nuestra{' '}
+          <Text
+            style={s.termsLink}
+            onPress={() => Linking.openURL('https://jgutierrezg.github.io/bbmxleague/privacy-policy.html')}
+          >
+            Política de Privacidad
+          </Text>
+        </Text>
       </View>
     </SafeAreaView>
   );
@@ -109,4 +117,5 @@ const s = StyleSheet.create({
   gIcon:     { fontSize: 16, fontWeight: '900', color: '#4285F4' },
   btnText:   { fontSize: 15, fontWeight: '600', color: '#1a1a2e' },
   terms:     { fontSize: 12, color: '#444', textAlign: 'center' },
+  termsLink: { color: '#e63946', textDecorationLine: 'underline' },
 });
