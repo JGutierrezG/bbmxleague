@@ -14,10 +14,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.elpapa.mxbbl"
+      "bundleIdentifier": "com.elpapa.mxbb"
     },
     "android": {
-      "package": "com.elpapa.mxbbl",
+      "package": "com.elpapa.mxbb",
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#0a0a0f",
