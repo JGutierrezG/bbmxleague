@@ -12,8 +12,7 @@
       "distribution": "internal"
     },
     "production": {
-      "autoIncrement": true,
-      "prebuildCommand": "echo $GOOGLE_SERVICES_JSON_B64 | base64 -d > ./google-services.json && npx expo prebuild --clean"
+      "autoIncrement": true
     }
   },
   "submit": {

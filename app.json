@@ -18,13 +18,15 @@
     },
     "android": {
       "package": "com.elpapa.mxbb",
-      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#0a0a0f",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
-      }
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -40,8 +42,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "487ac9da-26a4-4344-b8c0-69bf61eea105"
+        "projectId": "aede16b7-2ceb-4243-bcc5-c9b8a25a4249"
       }
-    }
+    },
+    "owner": "bolmack"
   }
 }
